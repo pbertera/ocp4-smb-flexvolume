@@ -49,11 +49,12 @@ mount() {
 		ALL_OPTIONS="${ALL_OPTIONS},domain=${DOMAIN}"
 	fi
 	if [ -n "$MOUNT_OPTIONS" ]; then
-        echo "`date` OPTIONS: $MOUNT_OPTIONS " >> $LOG
 		ALL_OPTIONS="${ALL_OPTIONS},${MOUNT_OPTIONS}"
 	fi
 	
+    echo "`date` OPTIONS: $ALL_OPTIONS" >> $LOG
 	if ismounted ; then
+        echo "`date` INFO: already mounted" >> $LOG
 		log '{"status": "Success"}'
 		exit 0
 	fi
