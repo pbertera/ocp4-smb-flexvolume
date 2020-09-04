@@ -52,7 +52,7 @@ mount() {
 		ALL_OPTIONS="${ALL_OPTIONS},${MOUNT_OPTIONS}"
 	fi
 	
-    echo "`date` OPTIONS: $ALL_OPTIONS" >> $LOG
+#   echo "`date` OPTIONS: $ALL_OPTIONS" >> $LOG
 	if ismounted ; then
         echo "`date` INFO: already mounted" >> $LOG
 		log '{"status": "Success"}'
@@ -60,8 +60,8 @@ mount() {
 	fi
 
 	echo "`date` EXEC: mkdir -p ${MNTPATH}" >> $LOG
-	mkdir -p ${MNTPATH} >>$LOG 2>&1
-
+	mkdir -p "${MNTPATH}" >>$LOG 2>&1
+    ls -l "${MNTPATH}" # DELME    
 	#mounting
 	echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH}" >>$LOG
 	
