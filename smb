@@ -61,9 +61,8 @@ mount() {
 
 	echo "`date` EXEC: mkdir -p ${MNTPATH}" >> $LOG
 	mkdir -p "${MNTPATH}" >>$LOG 2>&1
-    ls -l "${MNTPATH}" >>$LOG 2>&1 # DELME    
 	#mounting
-	echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH}" >>$LOG
+	echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH} -o ${ALL_OPTIONS}" >>$LOG
 	
 	$MOUNT_CIFS "${VOLUME_SRC}" "${MNTPATH}" -o "${ALL_OPTIONS}" >>$LOG 2>&1
 	if [ $? -ne 0 ]; then
