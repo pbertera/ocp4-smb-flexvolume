@@ -43,6 +43,7 @@ mount() {
 	USERNAME=$(echo "$JSON"|"$JQ" -r '.["kubernetes.io/secret/username"] // empty'|base64 -d)
 	PASSWORD=$(echo "$JSON"|"$JQ" -r '.["kubernetes.io/secret/password"] // empty'|base64 -d)
 	DOMAIN=$(echo "$JSON"|"$JQ" -r '.["kubernetes.io/secret/domain"] // empty'|base64 -d)
+    DEBUG=$(echo "$JSON"|"$JQ" -r '.["kubernetes.io/secret/debug"] // empty'|base64 -d)
 
 	ALL_OPTIONS="username=${USERNAME},password=${PASSWORD},${READ_MODE}"
 	if [ -n "$DOMAIN" ]; then
@@ -52,7 +53,6 @@ mount() {
 		ALL_OPTIONS="${ALL_OPTIONS},${MOUNT_OPTIONS}"
 	fi
 	
-#   echo "`date` OPTIONS: $ALL_OPTIONS" >> $LOG
 	if ismounted ; then
         echo "`date` INFO: already mounted" >> $LOG
 		log '{"status": "Success"}'
@@ -61,9 +61,14 @@ mount() {
 
 	echo "`date` EXEC: mkdir -p ${MNTPATH}" >> $LOG
 	mkdir -p "${MNTPATH}" >>$LOG 2>&1
-	#mounting
-	echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH} -o ${ALL_OPTIONS}" >>$LOG
 	
+    #mounting
+    if [ -n $DEBUG ]; then
+	    echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH} -o ${ALL_OPTIONS}" >>$LOG
+    else
+        echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH}" >>$LOG
+    fi
+
 	$MOUNT_CIFS "${VOLUME_SRC}" "${MNTPATH}" -o "${ALL_OPTIONS}" >>$LOG 2>&1
 	if [ $? -ne 0 ]; then
 		errorLog=`tail -n 1 "${LOG}"`
