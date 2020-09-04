@@ -1,0 +1,122 @@
+#!/bin/sh
+
+# Notes:
+#  - Please install "jq" package before using this driver.
+
+DIR=$(dirname "$(readlink -f "$0")")
+JQ="${DIR}/jq" && [ -f ${JQ} ] || JQ="/usr/bin/jq"
+MOUNT_CIFS="${DIR}/mount.cifs" && [ -f ${MOUNT_CIFS} ] || MOUNT_CIFS="/bin/mount -t cifs"
+LOG="/var/log/smb-driver.log"
+VER="1.0.3"
+
+usage() {
+	err "Invalid usage. Usage: "
+	err "\t$0 init"
+	err "\t$0 mount <mount dir> <mount device> <json params>"
+	err "\t$0 unmount <mount dir>"
+	exit 1
+}
+
+err() {
+	echo `date` "ERROR:" $* >> $LOG
+	echo $* 1>&2
+}
+
+log() {
+	echo `date` "INFO:" $* >> $LOG
+	echo $* >&1
+}
+
+ismounted() {
+	MOUNT=`findmnt -n ${MNTPATH} 2>/dev/null | cut -d' ' -f1`
+	if echo $MOUNT | grep -q ${MNTPATH}; then
+		return 0
+	fi
+	return 1
+}
+
+mount() {
+	MNTPATH="$1"
+	VOLUME_SRC=$(echo "$JSON"|"$JQ" -r '.source')
+	READ_MODE=$(echo "$JSON"|"$JQ" -r '.["kubernetes.io/readwrite"]')
+	MOUNT_OPTIONS=$(echo "$JSON"|"$JQ" -r '.mountoptions // empty')
+	USERNAME=$(echo "$JSON"|"$JQ" -r '.["kubernetes.io/secret/username"] // empty'|base64 -d)
+	PASSWORD=$(echo "$JSON"|"$JQ" -r '.["kubernetes.io/secret/password"] // empty'|base64 -d)
+	DOMAIN=$(echo "$JSON"|"$JQ" -r '.["kubernetes.io/secret/domain"] // empty'|base64 -d)
+
+	ALL_OPTIONS="username=${USERNAME},password=${PASSWORD},${READ_MODE}"
+	if [ -n "$DOMAIN" ]; then
+		ALL_OPTIONS="${ALL_OPTIONS},domain=${DOMAIN}"
+	fi
+	if [ -n "$MOUNT_OPTIONS" ]; then
+		ALL_OPTIONS="${ALL_OPTIONS},${MOUNT_OPTIONS}"
+	fi
+	
+	if ismounted ; then
+		log '{"status": "Success"}'
+		exit 0
+	fi
+
+	echo "`date` EXEC: mkdir -p ${MNTPATH}" >> $LOG
+	mkdir -p ${MNTPATH} >>$LOG 2>&1
+
+	#mounting
+	echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH}" >>$LOG
+	
+	$MOUNT_CIFS "${VOLUME_SRC}" "${MNTPATH}" -o "${ALL_OPTIONS}" >>$LOG 2>&1
+	if [ $? -ne 0 ]; then
+		errorLog=`tail -n 1 "${LOG}"`
+		err "{ \"status\": \"Failure\", \"message\": \"Failed to mount device ${DMDEV} at ${MNTPATH}, user:${USERNAME}, ${VOLUME_SRC}, error log:${errorLog}\" }"
+		exit 1
+	fi
+	log '{"status": "Success"}'
+	exit 0
+}
+
+unmount() {
+	MNTPATH="$1"
+	if ! ismounted ; then
+		log '{"status": "Success"}'
+		exit 0
+	fi
+
+	echo "`date` EXEC: umount $MNTPATH" >>$LOG
+	umount "${MNTPATH}" >>$LOG 2>&1
+	if [ $? -ne 0 ]; then
+		errorLog=`tail -n 1 "${LOG}"`
+		err "{ \"status\": \"Failed\", \"message\": \"Failed to unmount volume at ${MNTPATH}, error log:${errorLog}\" }"
+		exit 1
+	fi
+	echo "`date` EXEC: rmdir ${MNTPATH}" >> $LOG
+	rmdir "${MNTPATH}" >> $LOG 2>&1
+
+	log '{"status": "Success"}'
+	exit 0
+}
+
+op=$1
+
+if [ "$op" = "init" ]; then
+	log '{"status": "Success", "capabilities": {"attach": false}}'
+	exit 0
+fi
+
+if [ $# -lt 2 ]; then
+	usage
+fi
+
+shift
+
+case "$op" in
+	mount)
+		JSON=$2
+		mount $*
+		;;			
+	unmount)
+		unmount $*
+		;;
+	*)
+	usage
+esac
+
+exit 1
