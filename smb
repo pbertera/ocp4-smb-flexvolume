@@ -49,6 +49,7 @@ mount() {
 		ALL_OPTIONS="${ALL_OPTIONS},domain=${DOMAIN}"
 	fi
 	if [ -n "$MOUNT_OPTIONS" ]; then
+        echo "`date` OPTIONS: $MOUNT_OPTIONS " >> $LOG
 		ALL_OPTIONS="${ALL_OPTIONS},${MOUNT_OPTIONS}"
 	fi
 	

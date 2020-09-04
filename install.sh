@@ -2,7 +2,6 @@
 
 VER="1.0.3"
 target_dir="${TARGET_DIR}"
-mkdir -p $(dirname $LOG)
 echo "begin to install smb FlexVolume driver ${VER} ..." 
 
 if [[ -z "${target_dir}" ]]; then
