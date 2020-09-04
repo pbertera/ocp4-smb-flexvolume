@@ -61,7 +61,7 @@ mount() {
 
 	echo "`date` EXEC: mkdir -p ${MNTPATH}" >> $LOG
 	mkdir -p "${MNTPATH}" >>$LOG 2>&1
-    ls -l "${MNTPATH}" # DELME    
+    ls -l "${MNTPATH}" >>$LOG 2>&1 # DELME    
 	#mounting
 	echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH}" >>$LOG
 	
