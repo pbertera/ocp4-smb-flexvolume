@@ -3,11 +3,17 @@
 VER="1.0.3"
 vendor=${VENDOR-bertera.it}
 target_dir="${TARGET_DIR-/etc/kubernetes/kubelet-plugins/volume/exec}"
+smb_vol_dir="${target_dir}/${vendor}~smb"
 
 function bailout {
     echo ERROR: $@
     exit 1
 }
+
+if [ "$1" == "remove" ]; then
+    rm -rf ${smb_vol_dir}
+    exit 0
+fi
 
 echo "begin to install smb FlexVolume driver ${VER} ..." 
 
@@ -15,7 +21,6 @@ echo "begin to install smb FlexVolume driver ${VER} ..."
 #  target_dir="/etc/kubernetes/kubelet-plugins/volume/exec"
 #fi
 
-smb_vol_dir="${target_dir}/${vendor}~smb"
 mkdir -p ${smb_vol_dir} || bailout creating plugin directory ${smb_vol_dir}
 
 if [ "$INSTALL_DEPS" = true ] ; then
