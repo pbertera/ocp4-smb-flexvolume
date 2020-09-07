@@ -64,6 +64,7 @@ mount() {
 	
     #mounting
     if [ -n $DEBUG ]; then
+        echo "`date` INFO: JSON: '${JSON}'" >>$LOG
 	    echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH} -o ${ALL_OPTIONS}" >>$LOG
     else
         echo "`date` EXEC: ${MOUNT_CIFS} ${VOLUME_SRC} ${MNTPATH}" >>$LOG

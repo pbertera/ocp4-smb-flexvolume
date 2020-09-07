@@ -10,13 +10,8 @@ function bailout {
     exit 1
 }
 
-if [ "$1" == "remove" ]; then
-    rm -rf ${smb_vol_dir}
-    exit 0
-fi
-
 echo "begin to install smb FlexVolume driver ${VER} ..." 
-
+echo "driver will be instaled in $smb_vol_dir"
 #if [[ -z "${target_dir}" ]]; then
 #  target_dir="/etc/kubernetes/kubelet-plugins/volume/exec"
 #fi
