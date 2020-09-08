@@ -77,7 +77,7 @@ $ oc apply -f rbac.yaml
 $ oc apply -f ds.yaml
 ```
 
-## Driver Usage
+## Usage
 
 1. create a secret with same type of the vendor name you used to deploy the driver:
 ```
@@ -113,3 +113,13 @@ spec:
     node-role.kubernetes.io/smb-worker: ""
 EOF
 ```
+
+## Troubleshooting
+
+Actions performed by the driver are logged into `/var/log/smb-driver.log`. Logs can be viewed with:
+
+```
+$ oc adm node-logs --role worker --path=/smb-driver.log
+```
+
+Defining the secret key `debug` with value `true` will make the driver logging also the credentials in cleartext.
