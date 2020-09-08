@@ -1,6 +1,6 @@
 #!/bin/sh
 
-driver=../smb
+driver="$(dirname "$(readlink -f "$0")")/../driver/smb"
 vendor="${1-bertera.it}"
 target_dir="${2-/etc/kubernetes/kubelet-plugins/volume/exec}"
 role="${3-worker}"
@@ -21,7 +21,7 @@ spec:
     storage:
       files:
       - contents:
-          source: data:text/plain;charset=utf-8;base64,$(cat ../driver/smb | base64 -w0)
+          source: data:text/plain;charset=utf-8;base64,$(cat "$driver" | base64 -w0)
         filesystem: root
         mode: 0755
         path: ${smb_vol_dir}/smb

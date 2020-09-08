@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi8:8.2
+FROM registry.access.redhat.com/ubi8:latest 
 
 ARG INSTALL_DEPS=false
 ENV INSTALL_DEPS="$INSTALL_DEPS"
