@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-flex-smb
+spec:
+  containers:
+    - name: nginx-flex-smb
+      image: nginx
+      env:
+        - name: DEBUG
+          value: "yes"
+      volumeMounts:
+        - name: test
+          mountPath: /data
+  volumes:
+    - name: test
+      flexVolume:
+        driver: "microsoft.com/smb"
+        secretRef:
+          name: smbcreds
+        options:
+          source: "//172.30.182.189/share"
+  nodeSelector:
+    node-role.kubernetes.io/smb-worker: ""

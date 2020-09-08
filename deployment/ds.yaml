@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: smb-flexvol-installer
+  namespace: smb-flexvolume
+  labels:
+    k8s-app: smb
+spec:
+  selector:
+    matchLabels:
+      name: smb
+  template:
+    metadata:
+      labels:
+        name: smb
+    spec:
+      serviceAccountName: smb
+      containers:
+        - name: smb-flexvol-installer
+          image: quay.io/pbertera/ocp4-smb-flexvolume-full
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/rm", "-r", "/etc/kubernetes/kubelet-plugins/volume/exec/microsoft.com~smb"]
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          env:
+            - name: VENDOR
+              value: "microsoft.com"
+            - name: INSTALL_DEPS
+              value: "false"
+            - name: TARGET_DIR
+              value: "/etc/kubernetes/kubelet-plugins/volume/exec"
+          volumeMounts:
+            - name: volplugins
+              mountPath: /etc/kubernetes/kubelet-plugins/volume/exec/
+      volumes:
+        - name: volplugins
+          hostPath:
+            path: /etc/kubernetes/kubelet-plugins/volume/exec
+            type: DirectoryOrCreate
+      nodeSelector:
+        beta.kubernetes.io/os: linux  
