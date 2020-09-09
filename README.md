@@ -42,19 +42,21 @@ spec:
 $ oc apply -f smb-mcp.yaml
 ```
 
-2. create the 'MachineConfig`: the script `./deployment/createMachineConfig.sh` creates the `MachineConfig` you can customize the vendor specifying your vendor as first parameter of the command.
+2. create the `MachineConfig`: the script `./deployment/createMachineConfig.sh` creates the `MachineConfig` you can customize the vendor specifying your vendor as first parameter of the command.
 ```
 $ ./deployment/createMachineConfig.sh > smb-mc.yaml 
 # IF YOU WANT TO USE A CUSTOM MCP SET THE PROPER LABEL INTO smb-mc.yaml
 $ oc apply -f smb-mc.yaml
 ```
 
-3. [OPTIONAL] monitor the MCP
+3. [OPTIONAL] if you crated a dedicated MCP, add one or more nodes to the MCP
+
+4. monitor the MCP
 ```
 $ oc describe mcp smb-workers
 ```
 
-4. once the MCP is ready and all the nodes are updated the driver is installed. You can check it with:
+5. once the MCP is ready and all the nodes are updated the driver is installed. You can check it with:
 ```
 # the below command should list the smb executable
 oc debug node/<node-name> -- chroot /host ls -l /etc/kubernetes/kubelet-plugins/volume/exec/bertera.it~smb/
